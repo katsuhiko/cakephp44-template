@@ -49,8 +49,8 @@ return [
     'App' => [
         'namespace' => 'App',
         'encoding' => env('APP_ENCODING', 'UTF-8'),
-        'defaultLocale' => env('APP_DEFAULT_LOCALE', 'en_US'),
-        'defaultTimezone' => env('APP_DEFAULT_TIMEZONE', 'UTC'),
+        'defaultLocale' => env('APP_DEFAULT_LOCALE', 'ja_JP'),
+        'defaultTimezone' => env('APP_DEFAULT_TIMEZONE', 'Asia/Tokyo'),
         'base' => false,
         'dir' => 'src',
         'webroot' => 'webroot',
@@ -114,6 +114,7 @@ return [
             'serialize' => true,
             'duration' => '+1 years',
             'url' => env('CACHE_CAKECORE_URL', null),
+            "mask" => 0666,
         ],
 
         /*
@@ -129,6 +130,7 @@ return [
             'serialize' => true,
             'duration' => '+1 years',
             'url' => env('CACHE_CAKEMODEL_URL', null),
+            "mask" => 0666,
         ],
 
         /*
@@ -143,6 +145,7 @@ return [
             'serialize' => true,
             'duration' => '+1 years',
             'url' => env('CACHE_CAKEROUTES_URL', null),
+            "mask" => 0666,
         ],
     ],
 
@@ -296,7 +299,7 @@ return [
             'className' => Connection::class,
             'driver' => Mysql::class,
             'persistent' => false,
-            'timezone' => 'UTC',
+            'timezone' => 'Asia/Tokyo',
 
             /*
              * For MariaDB/MySQL the internal default changed from utf8 to utf8mb4, aka full utf-8 support, in CakePHP 3.6
@@ -310,7 +313,7 @@ return [
              */
             'flags' => [],
             'cacheMetadata' => true,
-            'log' => false,
+            'log' => filter_var(env('DB_LOG', false), FILTER_VALIDATE_BOOLEAN),
 
             /*
              * Set identifier quoting to true if you are using reserved words or
@@ -330,6 +333,12 @@ return [
              * which is the recommended value in production environments
              */
             //'init' => ['SET GLOBAL innodb_stats_on_metadata = 0'],
+            'host' => env('DB_HOST'),
+            'port' => env('DB_PORT', '3306'),
+            'username' => env('DB_USERNAME'),
+            'password' => env('DB_PASSWORD'),
+            'database' => env('DB_DATABASE'),
+            'url' => env('DB_URL', null),
         ],
 
         /*
@@ -339,13 +348,19 @@ return [
             'className' => Connection::class,
             'driver' => Mysql::class,
             'persistent' => false,
-            'timezone' => 'UTC',
+            'timezone' => 'Asia/Tokyo',
             //'encoding' => 'utf8mb4',
             'flags' => [],
             'cacheMetadata' => true,
             'quoteIdentifiers' => false,
             'log' => false,
             //'init' => ['SET GLOBAL innodb_stats_on_metadata = 0'],
+            'host' => env('DB_HOST'),
+            'port' => env('DB_PORT', '3306'),
+            'username' => env('DB_USERNAME'),
+            'password' => env('DB_PASSWORD'),
+            'database' => env('DB_DATABASE_TEST'),
+            'url' => env('DB_URL_TEST', null),
         ],
     ],
 
@@ -354,26 +369,26 @@ return [
      */
     'Log' => [
         'debug' => [
-            'className' => FileLog::class,
-            'path' => LOGS,
-            'file' => 'debug',
+            'className' => \App\Log\CustomConsoleLog::class,
+            'stream' => 'php://stdout',
+            'outputAs' => \Cake\Console\ConsoleOutput::PLAIN,
             'url' => env('LOG_DEBUG_URL', null),
             'scopes' => false,
             'levels' => ['notice', 'info', 'debug'],
         ],
         'error' => [
-            'className' => FileLog::class,
-            'path' => LOGS,
-            'file' => 'error',
+            'className' => \App\Log\CustomConsoleLog::class,
+            'stream' => 'php://stderr',
+            'outputAs' => \Cake\Console\ConsoleOutput::PLAIN,
             'url' => env('LOG_ERROR_URL', null),
             'scopes' => false,
             'levels' => ['warning', 'error', 'critical', 'alert', 'emergency'],
         ],
         // To enable this dedicated query log, you need set your datasource's log flag to true
         'queries' => [
-            'className' => FileLog::class,
-            'path' => LOGS,
-            'file' => 'queries',
+            'className' => \App\Log\CustomConsoleLog::class,
+            'stream' => 'php://stdout',
+            'outputAs' => \Cake\Console\ConsoleOutput::PLAIN,
             'url' => env('LOG_QUERIES_URL', null),
             'scopes' => ['queriesLog'],
         ],
@@ -419,6 +434,12 @@ return [
      * To use database sessions, load the SQL file located at config/schema/sessions.sql
      */
     'Session' => [
-        'defaults' => 'php',
+        'defaults' => 'database',
+        'cookie' => env('APP_NAME'),
+        'timeout' => 1440, // 1day(単位：分)
+        'ini' => [
+            'session.cookie_secure' => filter_var(env('SERVER', false), FILTER_VALIDATE_BOOLEAN),
+            'session.cookie_path' => '/',
+        ]
     ],
 ];

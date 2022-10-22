@@ -1,0 +1,56 @@
+server {
+    listen 80;
+    listen [::]:80;
+    server_name _;
+
+    root  /var/www/html/webroot;
+    index /statics/index.html;
+
+    access_log /var/log/nginx/access.log;
+    error_log  /var/log/nginx/error.log;
+    # タイムアウトを明示する。
+    # php は 180 秒でタイムアウトさせるので、nginx は、それより長い 190 秒にしている。
+    fastcgi_read_timeout 190;
+
+    # https://qiita.com/tt2004d/items/59fdb3702230641a9198
+    # X-FORWARDED-PROTOを使ってHTTPS判定する変数を作成
+    # ヘルスチェックはログに出さない！！
+    set $elb_https off;
+    if ($http_x_forwarded_proto = https) {
+        set $elb_https on;
+    }
+    location = /healthcheck.html {
+        access_log off;
+        break;
+    }
+    location / {
+        root /var/www/html/webroot/statics;
+        try_files $uri $uri/ /statics/index.html;
+    }
+    location /images/ {
+        try_files $uri $uri/ /index.php$is_args$args;
+    }
+    location /api/ {
+        try_files $uri $uri/ /index.php$is_args$args;
+    }
+    location ~ \.html$ {
+        add_header Cache-Control "no-cache, no-store";
+        add_header Content-Security-Policy "default-src 'self' https://*.cydas.com; script-src 'self' 'unsafe-eval' https://*.cydas.com; img-src http: https: blob: data:; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src blob: 'self' https://*.cydas.com https://zipcloud.ibsnet.co.jp/ https://cydascom.github.io/ https://*.amazonaws.com;";
+        add_header X-Permitted-Cross-Domain-Policies none;
+        add_header Referrer-Policy no-referrer;
+        add_header X-Frame-Options SAMEORIGIN;
+        add_header X-XSS-Protection "1; mode=block";
+        add_header X-Download-Options noopen;
+        add_header X-Content-Type-Options nosniff;
+    }
+    location ~ \.php$ {
+        try_files $uri =404;
+        fastcgi_param HTTPS $elb_https;
+        include fastcgi_params;
+        fastcgi_pass ${PHP_APP_HOST};
+        fastcgi_index index.php;
+        fastcgi_intercept_errors on;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_hide_header X-Powered-By;
+    }
+}
