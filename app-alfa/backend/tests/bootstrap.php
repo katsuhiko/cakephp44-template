@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 use Cake\Core\Configure;
 use Cake\Datasource\ConnectionManager;
-use Migrations\TestSuite\Migrator;
+// use Migrations\TestSuite\Migrator;
 
 /**
  * Test runner bootstrap.
@@ -62,4 +62,5 @@ session_id('cli');
 // load schema from a SQL dump file with
 // use Cake\TestSuite\Fixture\SchemaLoader;
 // (new SchemaLoader())->loadSqlFiles('./tests/schema.sql', 'test');
-(new Migrator())->run();
+
+// (new Migrator())->run(); // テストでは DB を使わない。

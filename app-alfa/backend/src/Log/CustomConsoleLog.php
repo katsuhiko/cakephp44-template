@@ -15,7 +15,7 @@ class CustomConsoleLog extends ConsoleLog
     {
         $message = $this->_format($message, $context);
 
-        $accoutId = Configure::read('Account.id');
+        $accoutId = strval(Configure::read('Account.id'));
         $sessionId = session_id();
         $message = "[{$accoutId}][$sessionId] {$message}";
 

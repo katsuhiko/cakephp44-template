@@ -1,8 +1,11 @@
+includes:
+    - vendor/phpstan/phpstan-mockery/extension.neon
 parameters:
-    level: 8
+    level: max
     checkMissingIterableValueType: false
     treatPhpDocTypesAsCertain: false
     paths:
         - src/
+        - packages/
     excludePaths:
         - src/Console/Installer.php
