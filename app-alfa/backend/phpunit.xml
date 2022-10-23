@@ -33,7 +33,7 @@
         </include>
         <exclude>
             <file>src/Console/Installer.php</file>
-            <directory suffix=".php">packages/*/Test/</directory>
+            <directory suffix=".php">packages/*/*/Test/</directory>
         </exclude>
     </coverage>
 </phpunit>
