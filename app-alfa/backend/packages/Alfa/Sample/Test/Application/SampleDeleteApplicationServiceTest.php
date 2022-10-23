@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Alfa\Sample\Test\Application;
 
 use Alfa\Common\Test\Application\TestTransaction;
+use Alfa\Common\Domain\Model\TransactionException;
 use Alfa\Sample\Application\SampleDeleteApplicationService;
 use Alfa\Sample\Application\SampleDeleteCommand;
 use Alfa\Sample\Domain\Model\ISampleRepository;
@@ -65,13 +66,13 @@ class SampleDeleteApplicationServiceTest extends TestCase
 
         // Expect
         $this->mockSampleRepository->shouldReceive('remove')
+            ->once()
             ->with(
                 Mockery::on(function (SampleId $sampleId) use ($command) {
                     return $sampleId->asString() === $command->sampleId;
                 })
             )
-            ->andReturn(true)
-            ->once();
+            ->andReturn(true);
 
         // Act
         $result = $this->applicationService->handle($command);
@@ -79,4 +80,26 @@ class SampleDeleteApplicationServiceTest extends TestCase
         // Assert
         $this->assertNotNull($result);
     }
-}
+
+    /**
+     * @test
+     * @return void
+     */
+    public function testHandle_IfDeleteFails_ThrowAnException(): void
+    {
+        // Arrange
+        $sampleId = SampleId::newId();
+        $command = new SampleDeleteCommand(
+            $sampleId->asString()
+        );
+
+        // Expect
+        $this->expectException(TransactionException::class);
+
+        $this->mockSampleRepository->shouldReceive('remove')
+            ->once()
+            ->andReturn(false);
+
+        // Act
+        $result = $this->applicationService->handle($command);
+    }}

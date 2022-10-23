@@ -36,7 +36,7 @@ class SamplePostApplicationService
         );
 
         $this->transaction->transactional(function () use ($sample) {
-            $result = $this->sampleRepository->save($sample);
+            $result = $this->sampleRepository->create($sample);
             if (!$result) {
                 throw new TransactionException("[{$sample->getSampleId()}] samples 登録できませんでした。");
             }

@@ -62,8 +62,8 @@ class SampleListGetApplicationServiceTest extends TestCase
 
         // Expect
         $this->mockSampleRepository->shouldReceive('findAll')
-            ->andReturn($expectedSamples)
-            ->once();
+            ->once()
+            ->andReturn($expectedSamples);
 
         // Act
         $result = $this->applicationService->handle($command);

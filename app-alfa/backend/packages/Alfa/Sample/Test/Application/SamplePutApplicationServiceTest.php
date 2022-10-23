@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Alfa\Sample\Test\Application;
 
 use Alfa\Common\Test\Application\TestTransaction;
+use Alfa\Common\Domain\Model\TransactionException;
 use Alfa\Sample\Application\SamplePutApplicationService;
 use Alfa\Sample\Application\SamplePutCommand;
 use Alfa\Sample\Domain\Model\ISampleRepository;
@@ -67,7 +68,8 @@ class SamplePutApplicationServiceTest extends TestCase
         );
 
         // Expect
-        $this->mockSampleRepository->shouldReceive('save')
+        $this->mockSampleRepository->shouldReceive('update')
+            ->once()
             ->with(
                 Mockery::on(function (Sample $sample) use ($command) {
                     return $sample->getSampleId()->asString() === $command->sampleId
@@ -75,8 +77,35 @@ class SamplePutApplicationServiceTest extends TestCase
                         && $sample->getContent() === $command->content;
                 })
             )
-            ->andReturn(true)
-            ->once();
+            ->andReturn(true);
+
+        // Act
+        $result = $this->applicationService->handle($command);
+
+        // Assert
+        $this->assertNotNull($result);
+    }
+
+    /**
+     * @test
+     * @return void
+     */
+    public function testHandle_IfUpdateFails_ThrowAnException(): void
+    {
+        // Arrange
+        $sampleId = SampleId::newId();
+        $command = new SamplePutCommand(
+            $sampleId->asString(),
+            'タイトル',
+            '内容です。'
+        );
+
+        // Expect
+        $this->expectException(TransactionException::class);
+
+        $this->mockSampleRepository->shouldReceive('update')
+            ->once()
+            ->andReturn(false);
 
         // Act
         $result = $this->applicationService->handle($command);

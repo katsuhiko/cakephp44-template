@@ -15,17 +15,34 @@ final class SampleRepository implements ISampleRepository
     /**
      * @inheritDoc
      */
-    public function save(Sample $sample): bool
+    public function create(Sample $sample): bool
     {
         $samplesTable = $this->getTableLocator()->get('Samples');
 
         /** @var ?\App\Model\Entity\Sample $entity */
-        $entity = $samplesTable->find()->where(['id' => $sample->getSampleId()->asString()])->first();
-        if (is_null($entity)) {
-            /** @var \App\Model\Entity\Sample $entity */
-            $entity = $samplesTable->newEmptyEntity();
-            $entity->id = $sample->getSampleId()->asString();
+        $entity = $samplesTable->newEmptyEntity();
+        $entity->id = $sample->getSampleId()->asString();
+
+        $entity->title = $sample->getTitle();
+        $entity->content = $sample->getContent();
+
+        $result = $samplesTable->save($entity, ['atomic' => false, 'checkExisting' => false]);
+        if (!$result) {
+            return false;
         }
+
+        return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function update(Sample $sample): bool
+    {
+        $samplesTable = $this->getTableLocator()->get('Samples');
+
+        /** @var ?\App\Model\Entity\Sample $entity */
+        $entity = $samplesTable->get($sample->getSampleId()->asString());
 
         $entity->title = $sample->getTitle();
         $entity->content = $sample->getContent();

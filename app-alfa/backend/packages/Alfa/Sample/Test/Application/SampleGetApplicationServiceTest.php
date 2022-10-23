@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Alfa\Sample\Test\Application;
 
+use Alfa\Common\Domain\Model\RecordNotFoundException;
 use Alfa\Sample\Application\SampleGetApplicationService;
 use Alfa\Sample\Application\SampleGetCommand;
 use Alfa\Sample\Domain\Model\ISampleRepository;
@@ -64,13 +65,13 @@ class SampleGetApplicationServiceTest extends TestCase
 
         // Expect
         $this->mockSampleRepository->shouldReceive('findById')
+            ->once()
             ->with(
                 Mockery::on(function (SampleId $sampleId) use ($command) {
                     return $sampleId->asString() === $command->sampleId;
                 })
             )
-            ->andReturn($expectedSample)
-            ->once();
+            ->andReturn($expectedSample);
 
         // Act
         $result = $this->applicationService->handle($command);
@@ -79,5 +80,28 @@ class SampleGetApplicationServiceTest extends TestCase
         $this->assertEquals($expectedSample->getSampleId(), $result->sampleId);
         $this->assertEquals($expectedSample->getTitle(), $result->title);
         $this->assertEquals($expectedSample->getContent(), $result->content);
+    }
+
+    /**
+     * @test
+     * @return void
+     */
+    public function testHandle_IfRecordIsNotFound_ThrowAnException(): void
+    {
+        // Arrange
+        $sampleId = SampleId::newId();
+        $command = new SampleGetCommand(
+            $sampleId->asString()
+        );
+
+        // Expect
+        $this->expectException(RecordNotFoundException::class);
+
+        $this->mockSampleRepository->shouldReceive('findById')
+            ->once()
+            ->andReturn(null);
+
+        // Act
+        $result = $this->applicationService->handle($command);
     }
 }

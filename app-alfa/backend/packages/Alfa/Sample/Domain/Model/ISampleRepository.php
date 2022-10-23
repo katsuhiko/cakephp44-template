@@ -9,7 +9,13 @@ interface ISampleRepository
      * @param \Alfa\Sample\Domain\Model\Sample $sample sample
      * @return bool
      */
-    public function save(Sample $sample): bool;
+    public function create(Sample $sample): bool;
+
+    /**
+     * @param \Alfa\Sample\Domain\Model\Sample $sample sample
+     * @return bool
+     */
+    public function update(Sample $sample): bool;
 
     /**
      * @param \Alfa\Sample\Domain\Model\SampleId $sampleId sampleId

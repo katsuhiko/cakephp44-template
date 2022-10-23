@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Alfa\Sample\Test\Application;
 
 use Alfa\Common\Test\Application\TestTransaction;
+use Alfa\Common\Domain\Model\TransactionException;
 use Alfa\Sample\Application\SamplePostApplicationService;
 use Alfa\Sample\Application\SamplePostCommand;
 use Alfa\Sample\Domain\Model\ISampleRepository;
@@ -66,20 +67,43 @@ class SamplePostApplicationServiceTest extends TestCase
         );
 
         // Expect
-        $this->mockSampleRepository->shouldReceive('save')
+        $this->mockSampleRepository->shouldReceive('create')
+            ->once()
             ->with(
                 Mockery::on(function (Sample $sample) use ($command) {
                     return $sample->getTitle() === $command->title
                         && $sample->getContent() === $command->content;
                 })
             )
-            ->andReturn(true)
-            ->once();
+            ->andReturn(true);
 
         // Act
         $result = $this->applicationService->handle($command);
 
         // Assert
         $this->assertNotNull($result->sampleId);
+    }
+
+    /**
+     * @test
+     * @return void
+     */
+    public function testHandle_IfCreateFails_ThrowAnException(): void
+    {
+        // Arrange
+        $command = new SamplePostCommand(
+            'タイトル',
+            '内容です。'
+        );
+
+        // Expect
+        $this->expectException(TransactionException::class);
+
+        $this->mockSampleRepository->shouldReceive('create')
+            ->once()
+            ->andReturn(false);
+
+        // Act
+        $result = $this->applicationService->handle($command);
     }
 }

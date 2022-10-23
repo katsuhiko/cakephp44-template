@@ -36,7 +36,7 @@ class SamplePutApplicationService
         );
 
         $this->transaction->transactional(function () use ($sample) {
-            $result = $this->sampleRepository->save($sample);
+            $result = $this->sampleRepository->update($sample);
             if (!$result) {
                 throw new TransactionException("[{$sample->getSampleId()}] samples 更新できませんでした。");
             }
