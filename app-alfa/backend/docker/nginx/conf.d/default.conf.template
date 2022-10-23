@@ -35,7 +35,6 @@ server {
     }
     location ~ \.html$ {
         add_header Cache-Control "no-cache, no-store";
-        add_header Content-Security-Policy "default-src 'self' https://*.cydas.com; script-src 'self' 'unsafe-eval' https://*.cydas.com; img-src http: https: blob: data:; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src blob: 'self' https://*.cydas.com https://zipcloud.ibsnet.co.jp/ https://cydascom.github.io/ https://*.amazonaws.com;";
         add_header X-Permitted-Cross-Domain-Policies none;
         add_header Referrer-Policy no-referrer;
         add_header X-Frame-Options SAMEORIGIN;
