@@ -40,6 +40,7 @@ class SamplePostControllerTest extends TestCase
     }
 
     /**
+     * @test
      * @return void
      */
     public function testHandle(): void
@@ -63,14 +64,14 @@ class SamplePostControllerTest extends TestCase
 
         // Expect
         $this->mockApplicationService->shouldReceive('handle')
+            ->once()
             ->with(
                 Mockery::on(function (SamplePostCommand $command) use ($data) {
                     return $command->title === $data['title']
                         && $command->content === $data['content'];
                 })
             )
-            ->andReturn($result)
-            ->once();
+            ->andReturn($result);
         Configure::write('Mock.SamplePostApplicationService', $this->mockApplicationService);
 
         // Act
@@ -78,6 +79,44 @@ class SamplePostControllerTest extends TestCase
 
         // Assert
         $this->assertResponseOk();
+        $this->assertEquals($expected, (string)$this->_response->getBody());
+    }
+
+    /**
+     * @test
+     * @return void
+     */
+    public function testHandle_ValidationError(): void
+    {
+        // Arrange
+        $data = [
+            'content' => '内容です',
+        ];
+
+        $sampleId = SampleId::newId();
+
+        $expected = json_encode([
+            'errors' => [
+                [
+                    'code' => '_required',
+                    'source' => [
+                        'pointer' => '/title',
+                    ],
+                    'title' => 'This field is required',
+                ],
+            ],
+        ], JSON_PRETTY_PRINT);
+
+        // Expect
+        $this->mockApplicationService->shouldReceive('handle')
+            ->never();
+        Configure::write('Mock.SamplePostApplicationService', $this->mockApplicationService);
+
+        // Act
+        $this->post('/api/sample', $data);
+
+        // Assert
+        $this->assertResponseCode(400);
         $this->assertEquals($expected, (string)$this->_response->getBody());
     }
 }

@@ -40,6 +40,7 @@ class SamplePutControllerTest extends TestCase
     }
 
     /**
+     * @test
      * @return void
      */
     public function testHandle(): void
@@ -76,6 +77,43 @@ class SamplePutControllerTest extends TestCase
 
         // Assert
         $this->assertResponseOk();
+        $this->assertEquals($expected, (string)$this->_response->getBody());
+    }
+
+    /**
+     * @test
+     * @return void
+     */
+    public function testHandle_ValidationError(): void
+    {
+        // Arrange
+        $sampleId = SampleId::newId();
+        $data = [
+            'content' => '内容です',
+        ];
+
+        $expected = json_encode([
+            'errors' => [
+                [
+                    'code' => '_required',
+                    'source' => [
+                        'pointer' => '/title',
+                    ],
+                    'title' => 'This field is required',
+                ],
+            ],
+        ], JSON_PRETTY_PRINT);
+
+        // Expect
+        $this->mockApplicationService->shouldReceive('handle')
+            ->never();
+        Configure::write('Mock.SamplePutApplicationService', $this->mockApplicationService);
+
+        // Act
+        $this->put("/api/sample/{$sampleId->asString()}", $data);
+
+        // Assert
+        $this->assertResponseCode(400);
         $this->assertEquals($expected, (string)$this->_response->getBody());
     }
 }

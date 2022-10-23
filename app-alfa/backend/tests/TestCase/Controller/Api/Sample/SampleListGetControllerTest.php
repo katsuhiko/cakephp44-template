@@ -41,6 +41,7 @@ class SampleListGetControllerTest extends TestCase
     }
 
     /**
+     * @test
      * @return void
      */
     public function testHandle(): void
@@ -62,13 +63,13 @@ class SampleListGetControllerTest extends TestCase
 
         // Expect
         $this->mockApplicationService->shouldReceive('handle')
+            ->once()
             ->with(
                 Mockery::on(function (SampleListGetCommand $command) {
                     return true;
                 })
             )
-            ->andReturn($result)
-            ->once();
+            ->andReturn($result);
         Configure::write('Mock.SampleListGetApplicationService', $this->mockApplicationService);
 
         // Act

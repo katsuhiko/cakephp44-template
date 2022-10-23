@@ -19,7 +19,7 @@ final class SampleRepository implements ISampleRepository
     {
         $samplesTable = $this->getTableLocator()->get('Samples');
 
-        /** @var ?\App\Model\Entity\Sample $entity */
+        /** @var \App\Model\Entity\Sample $entity */
         $entity = $samplesTable->newEmptyEntity();
         $entity->id = $sample->getSampleId()->asString();
 
@@ -41,7 +41,7 @@ final class SampleRepository implements ISampleRepository
     {
         $samplesTable = $this->getTableLocator()->get('Samples');
 
-        /** @var ?\App\Model\Entity\Sample $entity */
+        /** @var \App\Model\Entity\Sample $entity */
         $entity = $samplesTable->get($sample->getSampleId()->asString());
 
         $entity->title = $sample->getTitle();

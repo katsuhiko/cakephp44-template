@@ -40,6 +40,7 @@ class SampleDeleteControllerTest extends TestCase
     }
 
     /**
+     * @test
      * @return void
      */
     public function testHandle(): void
@@ -55,13 +56,13 @@ class SampleDeleteControllerTest extends TestCase
 
         // Expect
         $this->mockApplicationService->shouldReceive('handle')
+            ->once()
             ->with(
                 Mockery::on(function (SampleDeleteCommand $command) use ($sampleId) {
                     return $command->sampleId === $sampleId->asString();
                 })
             )
-            ->andReturn($result)
-            ->once();
+            ->andReturn($result);
         Configure::write('Mock.SampleDeleteApplicationService', $this->mockApplicationService);
 
         // Act
