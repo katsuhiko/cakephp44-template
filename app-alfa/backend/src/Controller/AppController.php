@@ -42,12 +42,53 @@ class AppController extends Controller
         parent::initialize();
 
         $this->loadComponent('RequestHandler');
-        $this->loadComponent('Flash');
+        // $this->loadComponent('Flash');
 
         /*
          * Enable the following component for recommended CakePHP form protection settings.
          * see https://book.cakephp.org/4/en/controllers/components/form-protection.html
          */
         //$this->loadComponent('FormProtection');
+    }
+
+    /**
+     * @param array $formErrors formErrors
+     * @return void
+     */
+    protected function responseValidationError(array $formErrors): void
+    {
+        $errors = [];
+
+        foreach ($formErrors as $field => $messages) {
+            foreach ($messages as $key => $title) {
+                if (!is_int($key)) {
+                    // メイン Form でのエラー
+                    // {"code":   {"_empty": "1文字以上で入力してください"}}
+                    // {"$field": {"$key":   "$title"}}
+                    $errors[] = [
+                        'code' => $key,
+                        'source' => [ 'pointer' => "/{$field}"],
+                        'title' => $title,
+                    ];
+                } else {
+                    // ネストされた Form でのエラー
+                    // {"list":   {0:    {"code":       {"integer":  "半角数字で入力してください"}}}}
+                    // {"$field": {$key: {"$nestField": {"$nestKey": "$nestTitle"}}}}
+                    foreach ($title as $nestField => $nestMessage) {
+                        foreach ($nestMessage as $nestKey => $nestTitle) {
+                            $errors[] = [
+                                'code' => $nestKey,
+                                'source' => [ 'pointer' => "/{$field}/{$key}/{$nestField}"],
+                                'title' => $nestTitle,
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+
+        $this->set('errors', $errors);
+        $this->viewBuilder()->setOption('serialize', ['errors']);
+        $this->response = $this->response->withStatus(400);
     }
 }

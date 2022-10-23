@@ -14,6 +14,7 @@
     <testsuites>
         <testsuite name="app">
             <directory>tests/TestCase/</directory>
+            <directory>packages/*/Test/</directory>
         </testsuite>
         <!-- Add plugin test suites here. -->
     </testsuites>
@@ -24,13 +25,15 @@
     </extensions>
 
     <!-- Ignore vendor tests in code coverage reports -->
-    <filter>
-        <whitelist>
+    <coverage>
+        <include>
             <directory suffix=".php">src/</directory>
+            <directory suffix=".php">packages/</directory>
             <directory suffix=".php">plugins/*/src/</directory>
-            <exclude>
-                <file>src/Console/Installer.php</file>
-            </exclude>
-        </whitelist>
-    </filter>
+        </include>
+        <exclude>
+            <file>src/Console/Installer.php</file>
+            <directory suffix=".php">packages/*/Test/</directory>
+        </exclude>
+    </coverage>
 </phpunit>
